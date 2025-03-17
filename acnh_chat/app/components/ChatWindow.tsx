@@ -110,7 +110,7 @@ export default function ChatWindow() {
     };
 
     return (
-        <div className="bg-[#DFF7E3] shadow-lg rounded-lg p-4 w-full max-w-lg flex flex-col h-[550px] border-4 border-[#96C291]">
+        <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-lg flex flex-col h-[550px] border-4 border-[#96C291] relative">
             {/* Start Screen */}
             {!isSetupComplete ? (
                 <div className="flex flex-col items-center justify-center h-full space-y-4">
@@ -199,11 +199,16 @@ export default function ChatWindow() {
 
                                     {/* Chat bubble */}
                                     <div
-                                        className={`p-3 rounded-3xl border-4`}
+                                        className="p-3 rounded-3xl border-4"
                                         style={{
                                             backgroundColor: "rgb(255, 250, 229)",
                                             color: "#74664B",
                                             borderColor: msg.sender === "user" ? "#F5D491" : villagers[msg.npcName!]?.bubbleColor || "#C8E090",
+                                            fontFamily: "'Raleway', sans-serif",
+                                            fontWeight: "800",
+                                            fontSize: "1rem",
+                                            letterSpacing: "0.2px",
+                                            lineHeight: "1.8rem",
                                         }}
                                     >
                                         {msg.text}
