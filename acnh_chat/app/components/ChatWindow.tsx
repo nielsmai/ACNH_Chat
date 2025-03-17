@@ -41,7 +41,7 @@ export default function ChatWindow() {
         setInput("");
 
         try {
-            const { name, catchphrase, personalityTraits, personalityDescription } = villagers[selectedNpc]
+            const { name, catchphrase, personalityTraits, personalityDescription } = villagers[selectedNpc];
 
             // Get the last few messages to provide context but keep things short
             const chatHistory: ({ role: "user" | "assistant"; content: string })[] = messages[selectedNpc].slice(-3).map((msg) => ({
@@ -52,28 +52,43 @@ export default function ChatWindow() {
             const chatResponse = await client.chat.complete({
                 model: "mistral-large-latest",
                 messages: [
-                  { role: "system", content: `You are ${name}, an Animal Crossing villager with the catchphrase "${catchphrase}".
-                      You have the following personality traits: ${personalityTraits.join(", ")}.
-                      Your personality description is: ${personalityDescription}.
-                      The user’s name is ${userName}, and they are from ${islandName} island.
-                      Address them warmly, use your catchphrase occasionally, and reflect your personality in your responses.
-                      Keep responses **short and friendly**.` },
-                  ...chatHistory, // Include previous messages
-                  { role: "user", content: input }, // User's latest message
+                    {
+                        role: "system", content: `You are ${name}, an Animal Crossing villager with the catchphrase "${catchphrase}".
+                        You have the following personality traits: ${personalityTraits.join(", ")}.
+                        Your personality description is: ${personalityDescription}.
+                        The user’s name is ${userName}, and they are from ${islandName} island.
+                        Address them warmly, use your catchphrase occasionally, and reflect your personality in your responses.
+                        Keep responses **short and friendly**.` },
+                    ...chatHistory, // Include previous messages
+                    { role: "user", content: input }, // User's latest message
                 ],
-              });
+            });
 
-            const npcMessage = typeof chatResponse.choices?.[0]?.message?.content === "string"
-                ? chatResponse.choices[0].message.content
-                : "Hmm... I don't know what to say! 🍃";
+            const npcMessage = chatResponse.choices?.[0]?.message?.content || "Hmm... I don't know what to say! 🍃";
 
+            let animatedText = "";
             setMessages((prevMessages) => ({
                 ...prevMessages,
                 [selectedNpc]: [
                     ...prevMessages[selectedNpc],
-                    { text: npcMessage, sender: "npc", npcName: selectedNpc },
+                    { text: "", sender: "npc", npcName: selectedNpc }, // Placeholder for animation
                 ],
             }));
+
+            for (let i = 0; i < npcMessage.length; i++) {
+                setTimeout(() => {
+                    animatedText += npcMessage[i];
+                    setMessages((prevMessages) => {
+                        const updatedMessages = [...prevMessages[selectedNpc]];
+                        updatedMessages[updatedMessages.length - 1] = { text: animatedText, sender: "npc", npcName: selectedNpc };
+
+                        return {
+                            ...prevMessages,
+                            [selectedNpc]: updatedMessages,
+                        };
+                    });
+                }, i * 30);
+            }
         } catch (error) {
             console.error("Error fetching NPC response:", error);
             setMessages((prevMessages) => ({
@@ -95,11 +110,11 @@ export default function ChatWindow() {
     };
 
     return (
-        <div className="bg-white shadow-lg rounded-lg p-4 w-full max-w-lg flex flex-col h-[550px]">
+        <div className="bg-[#DFF7E3] shadow-lg rounded-lg p-4 w-full max-w-lg flex flex-col h-[550px] border-4 border-[#96C291]">
             {/* Start Screen */}
             {!isSetupComplete ? (
                 <div className="flex flex-col items-center justify-center h-full space-y-4">
-                    <h1 className="text-xl font-bold">Welcome to ACNH Chat! 🌿</h1>
+                    <h1 className="text-xl font-bold text-[#3E664D]">Welcome to ACNH Chat! 🌿</h1>
                     <input
                         type="text"
                         placeholder="Enter your name"
@@ -114,7 +129,7 @@ export default function ChatWindow() {
                         value={islandName}
                         onChange={(e) => setIslandName(e.target.value)}
                     />
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={startChat}>
+                    <button className="bg-[#96C291] text-white px-4 py-2 rounded-md" onClick={startChat}>
                         Start Chat
                     </button>
                 </div>
@@ -139,36 +154,63 @@ export default function ChatWindow() {
                         {/* Clear Chat Button */}
                         <button
                             onClick={clearAllChats}
-                            className="bg-red-500 text-white px-3 py-1 rounded-md text-sm"
+                            className="bg-red-300 text-white px-3 py-1 rounded-md text-sm hover:bg-red-400"
                         >
                             Clear All
                         </button>
                     </div>
 
                     {/* Messages */}
+                    {/* Messages */}
                     <div className="flex-1 overflow-y-auto space-y-4 p-2 border rounded-md">
-                        {messages[selectedNpc].map((msg, index) => (
-                            <div key={index} className={`flex items-center ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                                {msg.sender === "npc" && msg.npcName && (
-                                    <Image
-                                        src={villagers[msg.npcName]?.img || ""}
-                                        alt={msg.npcName}
-                                        width={40}
-                                        height={40}
-                                        className="rounded-full mr-2"
-                                    />
-                                )}
-                                <div
-                                    className={`p-3 rounded-lg max-w-[75%] ${msg.sender === "user"
-                                            ? "bg-blue-500 text-white"
-                                            : villagers[msg.npcName!]?.bubbleColor || "bg-gray-200"
-                                        }`}
-                                >
-                                    {msg.text}
+                        {messages[selectedNpc].map((msg, index) => {
+
+                            // Function to convert Tailwind color class to CSS color
+                            const tailwindToCssColor = (tailwindClass: string) => {
+                                switch (tailwindClass) {
+                                    case "bg-purple-300":
+                                        return "#d8b4fe"; // Corresponding hex color
+                                    // Add more cases for other Tailwind color classes as needed
+                                    default:
+                                        return "gray"; // Default color if not found
+                                }
+                            };
+
+                            const backgroundColor = msg.npcName ? tailwindToCssColor(villagers[msg.npcName]?.bubbleColor) : "gray";
+
+                            return (
+                                <div key={index} className={`flex items-center ${msg.sender === "user" ? "justify-end" : "justify-start"} relative`}>
+
+                                    {/* Villager name bubble */}
+                                    {msg.sender === "npc" && msg.npcName && (
+                                        <div
+                                            className={`absolute -top-5 left-2 px-2 py-1 text-xs rounded-full text-white`}
+                                            style={{
+                                                backgroundColor: backgroundColor,
+                                                padding: "4px 8px", // Add padding to make sure it shows up properly
+                                                borderRadius: "12px", // Rounded edges for the name bubble
+                                                zIndex: 10, // Ensure it appears on top
+                                                transform: "rotate(-5deg)", //Tile the name bubble
+                                            }}
+                                        >
+                                            {villagers[msg.npcName]?.name}
+                                        </div>
+                                    )}
+
+                                    {/* Chat bubble */}
+                                    <div
+                                        className={`p-3 rounded-3xl border-4`}
+                                        style={{
+                                            backgroundColor: "rgb(255, 250, 229)",
+                                            color: "#74664B",
+                                            borderColor: msg.sender === "user" ? "#F5D491" : villagers[msg.npcName!]?.bubbleColor || "#C8E090",
+                                        }}
+                                    >
+                                        {msg.text}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {/* Auto-scroll anchor */}
+                            );
+                        })}
                         <div ref={messagesEndRef} />
                     </div>
 
@@ -181,7 +223,7 @@ export default function ChatWindow() {
                             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                             placeholder="Type your message..."
                         />
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={sendMessage}>
+                        <button className="bg-[#96C291] text-white px-4 py-2 rounded-md" onClick={sendMessage}>
                             Send
                         </button>
                     </div>
