@@ -7,15 +7,19 @@ import { villagers } from "@/app/data/villagers";
 const apiKey = process.env.NEXT_PUBLIC_MISTRAL_API_KEY;
 const client = new Mistral({ apiKey: apiKey });
 
+const MESSAGE_HISTORY_LIMIT = 8; // Number of previous messages to include in the chat history
+
 export default function ChatWindow() {
     const [userName, setUserName] = useState("");
     const [islandName, setIslandName] = useState("");
     const [isSetupComplete, setIsSetupComplete] = useState(false);
-    const [selectedNpc, setSelectedNpc] = useState("aurora");
-    const [messages, setMessages] = useState<Record<string, { text: string; sender: "user" | "npc"; npcName?: string }[]>>({
-        aurora: [],
-        goose: [],
-    });
+    const [selectedNpc, setSelectedNpc] = useState(Object.keys(villagers)[0] || "");
+    const [messages, setMessages] = useState<Record<string, { text: string; sender: "user" | "npc"; npcName?: string }[]>>(
+        Object.keys(villagers).reduce((acc, villager) => {
+            acc[villager] = []; // Initialize empty messages for each villager
+            return acc;
+        }, {} as Record<string, { text: string; sender: "user" | "npc"; npcName?: string }[]>)
+    );
     const [input, setInput] = useState("");
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,7 +48,9 @@ export default function ChatWindow() {
             const { name, catchphrase, personalityTraits, personalityDescription } = villagers[selectedNpc];
 
             // Get the last few messages to provide context but keep things short
-            const chatHistory: ({ role: "user" | "assistant"; content: string })[] = messages[selectedNpc].slice(-3).map((msg) => ({
+            const chatHistory: ({ role: "user" | "assistant"; content: string })[] = messages[selectedNpc]
+            .slice(-MESSAGE_HISTORY_LIMIT)
+            .map((msg) => ({
                 role: msg.sender === "user" ? "user" : "assistant",
                 content: msg.text,
             }));
@@ -103,10 +109,10 @@ export default function ChatWindow() {
 
     // Clears all chat messages for all NPCs
     const clearAllChats = () => {
-        setMessages({
-            aurora: [],
-            goose: [],
-        });
+        setMessages(Object.keys(villagers).reduce((acc, villager) => {
+            acc[villager] = [];
+            return acc;
+        }, {} as Record<string, { text: string; sender: "user" | "npc"; npcName?: string }[]>));
     };
 
     return (
@@ -173,18 +179,7 @@ export default function ChatWindow() {
                     <div className="flex-1 overflow-y-auto space-y-4 p-2 border rounded-md">
                         {messages[selectedNpc].map((msg, index) => {
 
-                            // Function to convert Tailwind color class to CSS color
-                            const tailwindToCssColor = (tailwindClass: string) => {
-                                switch (tailwindClass) {
-                                    case "bg-purple-300":
-                                        return "#d8b4fe"; // Corresponding hex color
-                                    // Add more cases for other Tailwind color classes as needed
-                                    default:
-                                        return "gray"; // Default color if not found
-                                }
-                            };
-
-                            const backgroundColor = msg.npcName ? tailwindToCssColor(villagers[msg.npcName]?.bubbleColor) : "gray";
+                            const backgroundColor = msg.npcName ? villagers[msg.npcName]?.bubbleColor : "gray";
 
                             return (
                                 <div key={index} className={`flex items-center ${msg.sender === "user" ? "justify-end" : "justify-start"} relative`}>
