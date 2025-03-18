@@ -114,22 +114,30 @@ export default function ChatWindow() {
             {/* Start Screen */}
             {!isSetupComplete ? (
                 <div className="flex flex-col items-center justify-center h-full space-y-4">
-                    <h1 className="text-xl font-bold text-[#3E664D]">Welcome to ACNH Chat! 🌿</h1>
+                    <h1
+                        className="text-3xl font-normal leading-[1.167] text-[#D8A32A]"
+                        style={{
+                            fontFamily: "'Baloo 2', 'FinkHeavy', -apple-system, BlinkMacSystemFont, 'Segoe UI'",
+                        }}
+                    >
+                        Welcome to ACNH Chat! 🌿
+                    </h1>
+
                     <input
                         type="text"
                         placeholder="Enter your name"
-                        className="border p-2 rounded-md w-3/4"
+                        className="border p-2 rounded-md w-3/4 text-gray-900 placeholder-gray-700 text-center"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                     />
                     <input
                         type="text"
                         placeholder="Enter your island name"
-                        className="border p-2 rounded-md w-3/4"
+                        className="border p-2 rounded-md w-3/4 text-gray-900 placeholder-gray-700 text-center"
                         value={islandName}
                         onChange={(e) => setIslandName(e.target.value)}
                     />
-                    <button className="bg-[#96C291] text-white px-4 py-2 rounded-md" onClick={startChat}>
+                    <button className="bg-[#96C291] text-white px-4 py-2 rounded-md hover:bg-[#7CA377]" onClick={startChat}>
                         Start Chat
                     </button>
                 </div>
@@ -146,7 +154,7 @@ export default function ChatWindow() {
                                     className={`flex flex-col items-center ${selectedNpc === npc ? "border-2 border-blue-500 rounded-lg p-1" : ""}`}
                                 >
                                     <Image src={img} alt={name} width={50} height={50} className="rounded-full" />
-                                    <span className="text-sm">{name}</span>
+                                    <span className="text-sm text-[#3E664D] font-semibold">{name}</span>
                                 </button>
                             ))}
                         </div>
@@ -222,7 +230,7 @@ export default function ChatWindow() {
                     {/* Input */}
                     <div className="flex gap-2 mt-2">
                         <input
-                            className="border rounded-md p-2 flex-1"
+                            className="border rounded-md p-2 flex-1 placeholder-gray-600 text-gray-900"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -234,6 +242,7 @@ export default function ChatWindow() {
                     </div>
                 </>
             )}
+
         </div>
     );
 }
