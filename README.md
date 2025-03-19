@@ -25,10 +25,10 @@
 ### 🏝️ Start Screen  
 ![Start Screen](acnh_chat/screenshots/start-screen.png)  
 
-### 💬 Chat with Villagers  
+### 💬 Chatting with Aurora 🐧 
 ![Chatting with Aurora](acnh_chat/screenshots/aurora-chat.png)  
 
-### 🎨 Villager Selection  
+### 🎨 Chatting with Boots 🐊
 ![Chatting with Boots](acnh_chat/screenshots/boots-chat.png)  
 
 ## 🚀 Getting Started  
